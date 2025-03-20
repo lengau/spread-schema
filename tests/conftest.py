@@ -26,9 +26,9 @@ def project_main_module() -> types.ModuleType:
     """
     try:
         # This should be the project's main package; downstream projects must update this.
-        import starcraft
+        import spread_schema
 
-        main_module = starcraft
+        main_module = spread_schema
     except ImportError:
         pytest.fail(
             "Failed to import the project's main module: check if it needs updating",

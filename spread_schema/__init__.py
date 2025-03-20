@@ -1,9 +1,9 @@
-# This file is part of starcraft.
+# This file is part of spread_schema.
 #
-# Copyright 2023 Canonical Ltd.
+# Copyright 2025 Canonical Ltd.
 #
 # This program is free software: you can redistribute it and/or modify it
-# under the terms of the GNU General Public License version 3, as published
+# under the terms of the GNU Lesser General Public License version 3, as published
 # by the Free Software Foundation.
 #
 # This program is distributed in the hope that it will be useful, but WITHOUT
@@ -11,11 +11,9 @@
 # SATISFACTORY QUALITY, or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # General Public License for more details.
 #
-# You should have received a copy of the GNU General Public License along
+# You should have received a copy of the GNU Lesser General Public License along
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
-"""Starcraft package demo."""
-
-from typing import Any
+"""spread_schema base package."""
 
 try:
     from ._version import __version__
@@ -23,17 +21,9 @@ except ImportError:  # pragma: no cover
     from importlib.metadata import version, PackageNotFoundError
 
     try:
-        __version__ = version("starcraft")
+        __version__ = version("spread_schema")
     except PackageNotFoundError:
         __version__ = "dev"
-
-
-def hello(people: list[Any] | None = None) -> None:
-    """Says hello."""
-    print("Hello *craft team!")
-    if people:
-        for person in people:
-            print(f"Hello {person}!")
 
 
 __all__ = [

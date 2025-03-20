@@ -1,7 +1,7 @@
-PROJECT=starcraft
+PROJECT=spread_schema
 UV_TEST_GROUPS := "--group=dev"
 UV_DOCS_GROUPS := "--group=docs"
-UV_LINT_GROUPS := "--group=lint" "--group=types"
+UV_LINT_GROUPS := "--group=dev"
 
 # If you have dev dependencies that depend on your distro version, uncomment these:
 # ifneq ($(wildcard /etc/os-release),)

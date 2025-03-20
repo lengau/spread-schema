@@ -1,6 +1,6 @@
 settings:
   components:
-    - Starbase
+    - Spread
   labels:
     - "Status: Triaged"
   # Adds a comment with the JIRA ID

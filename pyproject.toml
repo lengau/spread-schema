@@ -1,13 +1,13 @@
 [project]
-name = "starcraft"
-description = "The basis for Starcraft team packages"
+name = "spread-schema"
+description = "Pydantic and JSON schemas for spread"
 dynamic = ["version", "readme"]
 dependencies = [
-
+    "pydantic~=2.0",
 ]
 classifiers = [
     "Development Status :: 1 - Planning",
-    "License :: OSI Approved :: GNU General Public License (GPL)",
+    "License :: OSI Approved :: GNU Lesser General Public License (LGPL)",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.12",
@@ -15,7 +15,6 @@ classifiers = [
 requires-python = ">=3.10"
 
 [project.scripts]
-starcraft-hello = "starcraft:hello"
 
 [dependency-groups]
 lint = [
@@ -85,7 +84,7 @@ build-backend = "setuptools.build_meta"
 readme = {file = "README.rst"}
 
 [tool.setuptools_scm]
-write_to = "starcraft/_version.py"
+write_to = "spread_schema/_version.py"
 # the version comes from the latest annotated git tag formatted as 'X.Y.Z'
 # version scheme:
 #   - X.Y.Z.post<commits since tag>+g<hash>.d<%Y%m%d>
@@ -145,7 +144,7 @@ exclude_also = [
 ]
 
 [tool.pyright]
-strict = ["starcraft"]
+strict = ["spread_schema"]
 pythonVersion = "3.10"
 pythonPlatform = "Linux"
 exclude = [
@@ -171,7 +170,7 @@ disallow_untyped_decorators = true
 disallow_any_generics = true
 
 [[tool.mypy.overrides]]
-module = ["starcraft.*"]
+module = ["spread_schema.*"]
 disallow_untyped_defs = true
 no_implicit_optional = true
 
@@ -182,7 +181,7 @@ strict = false
 [tool.ruff]
 line-length = 88
 target-version = "py310"
-src = ["starcraft", "tests"]
+src = ["spread_schema", "tests"]
 extend-exclude = ["docs"]
 
 [tool.ruff.format]
