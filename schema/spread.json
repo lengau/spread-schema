@@ -1,0 +1,992 @@
+{
+  "$defs": {
+    "AdhocBackend": {
+      "additionalProperties": false,
+      "description": "A backend which allows creating machines using custom scripts.\n\nhttps://github.com/canonical/spread?tab=readme-ov-file#adhoc",
+      "properties": {
+        "prepare": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "prepare script. Runs once per worker.",
+          "title": "Prepare"
+        },
+        "restore": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "restore script. Runs once per worker.",
+          "title": "Restore"
+        },
+        "prepare-each": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "prepare-each script. Runs once per task.",
+          "title": "Prepare-Each"
+        },
+        "restore-each": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "restore-each script. Runs once per task.",
+          "title": "Restore-Each"
+        },
+        "systems": {
+          "description": "Operating systems and versions that this backend will start.",
+          "examples": [
+            "fedora-41-64",
+            {
+              "ubuntu-24.04-64": {
+                "workers": 4
+              }
+            }
+          ],
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "additionalProperties": {
+                  "$ref": "#/$defs/System"
+                },
+                "type": "object"
+              }
+            ]
+          },
+          "title": "Systems",
+          "type": "array"
+        },
+        "type": {
+          "const": "adhoc",
+          "default": "adhoc",
+          "title": "Type",
+          "type": "string"
+        },
+        "allocate": {
+          "description": "Allocation script. Runs on the local machine.",
+          "title": "Allocate",
+          "type": "string"
+        },
+        "discard": {
+          "description": "Discard script. Runs on the local machine.",
+          "title": "Discard",
+          "type": "string"
+        }
+      },
+      "required": [
+        "systems",
+        "allocate",
+        "discard"
+      ],
+      "title": "AdhocBackend",
+      "type": "object"
+    },
+    "GoogleBackend": {
+      "additionalProperties": false,
+      "description": "A backend running on Google Cloud.\n\nSee the documentation for more info:\nhttps://github.com/canonical/spread?tab=readme-ov-file#google",
+      "properties": {
+        "prepare": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "prepare script. Runs once per worker.",
+          "title": "Prepare"
+        },
+        "restore": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "restore script. Runs once per worker.",
+          "title": "Restore"
+        },
+        "prepare-each": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "prepare-each script. Runs once per task.",
+          "title": "Prepare-Each"
+        },
+        "restore-each": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "restore-each script. Runs once per task.",
+          "title": "Restore-Each"
+        },
+        "systems": {
+          "description": "Operating systems and versions that this backend will start.",
+          "examples": [
+            "fedora-41-64",
+            {
+              "ubuntu-24.04-64": {
+                "workers": 4
+              }
+            }
+          ],
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "additionalProperties": {
+                  "$ref": "#/$defs/System"
+                },
+                "type": "object"
+              }
+            ]
+          },
+          "title": "Systems",
+          "type": "array"
+        },
+        "type": {
+          "const": "google",
+          "default": "google",
+          "title": "Type",
+          "type": "string"
+        },
+        "key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Path to a Google key JSON file. If unset, uses the current user's default credentials.",
+          "examples": [
+            "$(HOST:echo $GOOGLE_JSON_FILENAME)"
+          ],
+          "title": "Key"
+        },
+        "location": {
+          "title": "Location",
+          "type": "string"
+        },
+        "halt-timeout": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Timeout after which the systems will automatically shutdown.",
+          "examples": [
+            "6h"
+          ],
+          "title": "Halt-Timeout"
+        }
+      },
+      "required": [
+        "systems",
+        "location"
+      ],
+      "title": "GoogleBackend",
+      "type": "object"
+    },
+    "LinodeBackend": {
+      "additionalProperties": false,
+      "properties": {
+        "prepare": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "prepare script. Runs once per worker.",
+          "title": "Prepare"
+        },
+        "restore": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "restore script. Runs once per worker.",
+          "title": "Restore"
+        },
+        "prepare-each": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "prepare-each script. Runs once per task.",
+          "title": "Prepare-Each"
+        },
+        "restore-each": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "restore-each script. Runs once per task.",
+          "title": "Restore-Each"
+        },
+        "systems": {
+          "description": "Operating systems and versions that this backend will start.",
+          "examples": [
+            "fedora-41-64",
+            {
+              "ubuntu-24.04-64": {
+                "workers": 4
+              }
+            }
+          ],
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "additionalProperties": {
+                  "$ref": "#/$defs/System"
+                },
+                "type": "object"
+              }
+            ]
+          },
+          "title": "Systems",
+          "type": "array"
+        },
+        "type": {
+          "const": "linode",
+          "default": "linode",
+          "title": "Type",
+          "type": "string"
+        },
+        "key": {
+          "description": "Linode API key",
+          "examples": [
+            "$(HOST:echo $LINODE_API_KEY)"
+          ],
+          "title": "Key",
+          "type": "string"
+        },
+        "halt-timeout": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Timeout after which the systems will automatically shutdown.",
+          "examples": [
+            "6h"
+          ],
+          "title": "Halt-Timeout"
+        },
+        "plan": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The plan to use when allocating new machines.",
+          "title": "Plan"
+        },
+        "location": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The data centre in which to allocate new machines.",
+          "title": "Location"
+        }
+      },
+      "required": [
+        "systems",
+        "key"
+      ],
+      "title": "LinodeBackend",
+      "type": "object"
+    },
+    "LxdBackend": {
+      "additionalProperties": false,
+      "properties": {
+        "prepare": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "prepare script. Runs once per worker.",
+          "title": "Prepare"
+        },
+        "restore": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "restore script. Runs once per worker.",
+          "title": "Restore"
+        },
+        "prepare-each": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "prepare-each script. Runs once per task.",
+          "title": "Prepare-Each"
+        },
+        "restore-each": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "restore-each script. Runs once per task.",
+          "title": "Restore-Each"
+        },
+        "systems": {
+          "description": "Operating systems and versions that this backend will start.",
+          "examples": [
+            "fedora-41-64",
+            {
+              "ubuntu-24.04-64": {
+                "workers": 4
+              }
+            }
+          ],
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "additionalProperties": {
+                  "$ref": "#/$defs/System"
+                },
+                "type": "object"
+              }
+            ]
+          },
+          "title": "Systems",
+          "type": "array"
+        },
+        "type": {
+          "const": "lxd",
+          "default": "lxd",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "systems"
+      ],
+      "title": "LxdBackend",
+      "type": "object"
+    },
+    "QemuBackend": {
+      "additionalProperties": false,
+      "properties": {
+        "prepare": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "prepare script. Runs once per worker.",
+          "title": "Prepare"
+        },
+        "restore": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "restore script. Runs once per worker.",
+          "title": "Restore"
+        },
+        "prepare-each": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "prepare-each script. Runs once per task.",
+          "title": "Prepare-Each"
+        },
+        "restore-each": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "restore-each script. Runs once per task.",
+          "title": "Restore-Each"
+        },
+        "systems": {
+          "description": "Operating systems and versions that this backend will start.",
+          "examples": [
+            "fedora-41-64",
+            {
+              "ubuntu-24.04-64": {
+                "workers": 4
+              }
+            }
+          ],
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "additionalProperties": {
+                  "$ref": "#/$defs/System"
+                },
+                "type": "object"
+              }
+            ]
+          },
+          "title": "Systems",
+          "type": "array"
+        },
+        "type": {
+          "const": "qemu",
+          "default": "qemu",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "systems"
+      ],
+      "title": "QemuBackend",
+      "type": "object"
+    },
+    "Suite": {
+      "additionalProperties": true,
+      "description": "Processed spread suite configuration.",
+      "properties": {
+        "prepare": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "prepare script. Runs once per worker.",
+          "title": "Prepare"
+        },
+        "restore": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "restore script. Runs once per worker.",
+          "title": "Restore"
+        },
+        "prepare-each": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "prepare-each script. Runs once per task.",
+          "title": "Prepare-Each"
+        },
+        "restore-each": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "restore-each script. Runs once per task.",
+          "title": "Restore-Each"
+        },
+        "summary": {
+          "description": "A summary of the tests in this suite.",
+          "title": "Summary",
+          "type": "string"
+        },
+        "systems": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A list of systems to test on. Defaults to all available.",
+          "title": "Systems"
+        },
+        "environment": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Environment variables to set in this test suite.",
+          "title": "Environment"
+        },
+        "warn-timeout": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Default warn timeout for tests in this suite. Defaults to the project warn-timeout. -1 will disable timeout altogether.",
+          "examples": [
+            "30s",
+            "1m30s",
+            "10m",
+            "1.5h"
+          ],
+          "title": "Warn-Timeout"
+        },
+        "kill-timeout": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Default kill timeout for tests in this suite. Defaults to the project kill-timeout. -1 will disable timeout altogether.",
+          "examples": [
+            "30s",
+            "1m30s",
+            "10m",
+            "1.5h"
+          ],
+          "title": "Kill-Timeout"
+        }
+      },
+      "required": [
+        "summary"
+      ],
+      "title": "Suite",
+      "type": "object"
+    },
+    "System": {
+      "additionalProperties": true,
+      "description": "A customised system.",
+      "properties": {
+        "username": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Username"
+        },
+        "password": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Password"
+        },
+        "workers": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Workers"
+        },
+        "memory": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Memory"
+        },
+        "storage": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Storage"
+        }
+      },
+      "title": "System",
+      "type": "object"
+    }
+  },
+  "additionalProperties": true,
+  "description": "A spread configuration file (spread.yaml).",
+  "properties": {
+    "prepare": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "prepare script. Runs once per worker.",
+      "title": "Prepare"
+    },
+    "restore": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "restore script. Runs once per worker.",
+      "title": "Restore"
+    },
+    "prepare-each": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "prepare-each script. Runs once per task.",
+      "title": "Prepare-Each"
+    },
+    "restore-each": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "restore-each script. Runs once per task.",
+      "title": "Restore-Each"
+    },
+    "project": {
+      "description": "The name of the project",
+      "examples": [
+        "hello-world"
+      ],
+      "title": "Project",
+      "type": "string"
+    },
+    "path": {
+      "description": "The base path to copy to on the remote machine.",
+      "format": "path",
+      "title": "Path",
+      "type": "string"
+    },
+    "environment": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Environment variables to set across the entire project.",
+      "title": "Environment",
+      "type": "object"
+    },
+    "backends": {
+      "additionalProperties": {
+        "discriminator": {
+          "mapping": {
+            "adhoc": "#/$defs/AdhocBackend",
+            "google": "#/$defs/GoogleBackend",
+            "linode": "#/$defs/LinodeBackend",
+            "lxd": "#/$defs/LxdBackend",
+            "qemu": "#/$defs/QemuBackend"
+          },
+          "propertyName": "type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/$defs/LxdBackend"
+          },
+          {
+            "$ref": "#/$defs/QemuBackend"
+          },
+          {
+            "$ref": "#/$defs/GoogleBackend"
+          },
+          {
+            "$ref": "#/$defs/LinodeBackend"
+          },
+          {
+            "$ref": "#/$defs/AdhocBackend"
+          }
+        ]
+      },
+      "description": "Backend configuration",
+      "title": "Backends",
+      "type": "object"
+    },
+    "suites": {
+      "patternProperties": {
+        "[^/].*/": {
+          "$ref": "#/$defs/Suite"
+        }
+      },
+      "propertyNames": {
+        "description": "The relative path to a suite."
+      },
+      "title": "Suites",
+      "type": "object"
+    },
+    "include": {
+      "description": "A list of path globs to send to each worker.",
+      "items": {
+        "type": "string"
+      },
+      "title": "Include",
+      "type": "array"
+    },
+    "exclude": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "A list of path globs to exclude.",
+      "title": "Exclude"
+    },
+    "rename": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "A list of regex replacements for renaming or moving files.",
+      "title": "Rename"
+    },
+    "warn-timeout": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Default warn timeout for tests. Defaults to 5 minutes. -1 will disable timeout altogether.",
+      "examples": [
+        "30s",
+        "1m30s",
+        "10m",
+        "1.5h"
+      ],
+      "title": "Warn-Timeout"
+    },
+    "kill-timeout": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Default kill timeout for tests. Defaults to 15 minutes. -1 will disable timeout altogether.",
+      "examples": [
+        "30s",
+        "1m30s",
+        "10m",
+        "1.5h"
+      ],
+      "title": "Kill-Timeout"
+    }
+  },
+  "required": [
+    "project",
+    "path",
+    "backends",
+    "suites"
+  ],
+  "title": "SpreadYaml",
+  "type": "object"
+}

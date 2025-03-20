@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # This file is part of spread_schema.
 #
 # Copyright 2025 Canonical Ltd.
@@ -13,32 +14,20 @@
 #
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
-"""spread_schema base package."""
+"""Generate JSON schema file for spread.yaml."""
 
-try:
-    from ._version import __version__
-except ImportError:  # pragma: no cover
-    from importlib.metadata import version, PackageNotFoundError
+import json
+import pathlib
 
-    try:
-        __version__ = version("spread_schema")
-    except PackageNotFoundError:
-        __version__ = "dev"
+import spread_schema
 
+PROJECT_DIR = pathlib.Path(__file__).parent
+SCHEMA_DIR = PROJECT_DIR / "schema"
 
-from ._base import alias_generator, BaseModel, PrepareRestoreEachModel
-from ._spread import System, Backend, BackendDict, SuitePath, Suite, SpreadYaml
-
-
-__all__ = [
-    "__version__",
-    "alias_generator",
-    "BaseModel",
-    "PrepareRestoreEachModel",
-    "System",
-    "Backend",
-    "BackendDict",
-    "SuitePath",
-    "Suite",
-    "SpreadYaml",
-]
+with (SCHEMA_DIR / "spread.json").open("w") as f:
+    json.dump(
+        spread_schema.SpreadYaml.model_json_schema(),
+        f,
+        indent=2,
+    )
+    f.write("\n")
