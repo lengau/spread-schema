@@ -56,6 +56,32 @@
           "description": "restore-each script. Runs once per task.",
           "title": "Restore-Each"
         },
+        "debug": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Script to run when other scripts fail.",
+          "title": "Debug"
+        },
+        "debug-each": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Debug script to run when each script fails",
+          "title": "Debug-Each"
+        },
         "systems": {
           "description": "Operating systems and versions that this backend will start.",
           "examples": [
@@ -105,6 +131,57 @@
         "discard"
       ],
       "title": "AdhocBackend",
+      "type": "object"
+    },
+    "BackendDict": {
+      "properties": {
+        "--extra-items--": {
+          "discriminator": {
+            "mapping": {
+              "adhoc": "#/$defs/AdhocBackend",
+              "google": "#/$defs/GoogleBackend",
+              "linode": "#/$defs/LinodeBackend",
+              "lxd": "#/$defs/LxdBackend",
+              "qemu": "#/$defs/QemuBackend"
+            },
+            "propertyName": "type"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/LxdBackend"
+            },
+            {
+              "$ref": "#/$defs/QemuBackend"
+            },
+            {
+              "$ref": "#/$defs/GoogleBackend"
+            },
+            {
+              "$ref": "#/$defs/LinodeBackend"
+            },
+            {
+              "$ref": "#/$defs/AdhocBackend"
+            }
+          ],
+          "title": "--Extra-Items--"
+        },
+        "lxd": {
+          "$ref": "#/$defs/LxdBackend"
+        },
+        "qemu": {
+          "$ref": "#/$defs/QemuBackend"
+        },
+        "google": {
+          "$ref": "#/$defs/GoogleBackend"
+        },
+        "linode": {
+          "$ref": "#/$defs/LinodeBackend"
+        },
+        "adhoc": {
+          "$ref": "#/$defs/AdhocBackend"
+        }
+      },
+      "title": "BackendDict",
       "type": "object"
     },
     "GoogleBackend": {
@@ -162,6 +239,32 @@
           "default": null,
           "description": "restore-each script. Runs once per task.",
           "title": "Restore-Each"
+        },
+        "debug": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Script to run when other scripts fail.",
+          "title": "Debug"
+        },
+        "debug-each": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Debug script to run when each script fails",
+          "title": "Debug-Each"
         },
         "systems": {
           "description": "Operating systems and versions that this backend will start.",
@@ -293,6 +396,32 @@
           "default": null,
           "description": "restore-each script. Runs once per task.",
           "title": "Restore-Each"
+        },
+        "debug": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Script to run when other scripts fail.",
+          "title": "Debug"
+        },
+        "debug-each": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Debug script to run when each script fails",
+          "title": "Debug-Each"
         },
         "systems": {
           "description": "Operating systems and versions that this backend will start.",
@@ -439,6 +568,32 @@
           "description": "restore-each script. Runs once per task.",
           "title": "Restore-Each"
         },
+        "debug": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Script to run when other scripts fail.",
+          "title": "Debug"
+        },
+        "debug-each": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Debug script to run when each script fails",
+          "title": "Debug-Each"
+        },
         "systems": {
           "description": "Operating systems and versions that this backend will start.",
           "examples": [
@@ -533,6 +688,32 @@
           "description": "restore-each script. Runs once per task.",
           "title": "Restore-Each"
         },
+        "debug": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Script to run when other scripts fail.",
+          "title": "Debug"
+        },
+        "debug-each": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Debug script to run when each script fails",
+          "title": "Debug-Each"
+        },
         "systems": {
           "description": "Operating systems and versions that this backend will start.",
           "examples": [
@@ -564,6 +745,19 @@
           "default": "qemu",
           "title": "Type",
           "type": "string"
+        },
+        "memory": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The amount of memory to provide to each worker.",
+          "title": "Memory"
         }
       },
       "required": [
@@ -573,7 +767,7 @@
       "type": "object"
     },
     "Suite": {
-      "additionalProperties": true,
+      "additionalProperties": false,
       "description": "Processed spread suite configuration.",
       "properties": {
         "prepare": {
@@ -628,6 +822,32 @@
           "description": "restore-each script. Runs once per task.",
           "title": "Restore-Each"
         },
+        "debug": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Script to run when other scripts fail.",
+          "title": "Debug"
+        },
+        "debug-each": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Debug script to run when each script fails",
+          "title": "Debug-Each"
+        },
         "summary": {
           "description": "A summary of the tests in this suite.",
           "title": "Summary",
@@ -649,12 +869,25 @@
           "description": "A list of systems to test on. Defaults to all available.",
           "title": "Systems"
         },
+        "backends": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Backends to run this suite on. Defaults to all available.",
+          "title": "Backends"
+        },
         "environment": {
           "anyOf": [
             {
-              "additionalProperties": {
-                "type": "string"
-              },
               "type": "object"
             },
             {
@@ -702,6 +935,12 @@
             "1.5h"
           ],
           "title": "Kill-Timeout"
+        },
+        "manual": {
+          "default": false,
+          "description": "Only run this suite when explicitly specified.",
+          "title": "Manual",
+          "type": "boolean"
         }
       },
       "required": [
@@ -711,7 +950,7 @@
       "type": "object"
     },
     "System": {
-      "additionalProperties": true,
+      "additionalProperties": false,
       "description": "A customised system.",
       "properties": {
         "username": {
@@ -772,14 +1011,24 @@
             }
           ],
           "default": null,
+          "description": "Storage to set on the system. Only used by google and linode backends.",
           "title": "Storage"
+        },
+        "bios": {
+          "default": null,
+          "description": "Bios type to use. Only used by QEMU backend.",
+          "enum": [
+            "uefi",
+            null
+          ],
+          "title": "Bios"
         }
       },
       "title": "System",
       "type": "object"
     }
   },
-  "additionalProperties": true,
+  "additionalProperties": false,
   "description": "A spread configuration file (spread.yaml).",
   "properties": {
     "prepare": {
@@ -834,6 +1083,32 @@
       "description": "restore-each script. Runs once per task.",
       "title": "Restore-Each"
     },
+    "debug": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Script to run when other scripts fail.",
+      "title": "Debug"
+    },
+    "debug-each": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Debug script to run when each script fails",
+      "title": "Debug-Each"
+    },
     "project": {
       "description": "The name of the project",
       "examples": [
@@ -849,46 +1124,13 @@
       "type": "string"
     },
     "environment": {
-      "additionalProperties": {
-        "type": "string"
-      },
       "description": "Environment variables to set across the entire project.",
       "title": "Environment",
       "type": "object"
     },
     "backends": {
-      "additionalProperties": {
-        "discriminator": {
-          "mapping": {
-            "adhoc": "#/$defs/AdhocBackend",
-            "google": "#/$defs/GoogleBackend",
-            "linode": "#/$defs/LinodeBackend",
-            "lxd": "#/$defs/LxdBackend",
-            "qemu": "#/$defs/QemuBackend"
-          },
-          "propertyName": "type"
-        },
-        "oneOf": [
-          {
-            "$ref": "#/$defs/LxdBackend"
-          },
-          {
-            "$ref": "#/$defs/QemuBackend"
-          },
-          {
-            "$ref": "#/$defs/GoogleBackend"
-          },
-          {
-            "$ref": "#/$defs/LinodeBackend"
-          },
-          {
-            "$ref": "#/$defs/AdhocBackend"
-          }
-        ]
-      },
-      "description": "Backend configuration",
-      "title": "Backends",
-      "type": "object"
+      "$ref": "#/$defs/BackendDict",
+      "description": "Backend configuration"
     },
     "suites": {
       "patternProperties": {
@@ -979,6 +1221,19 @@
         "1.5h"
       ],
       "title": "Kill-Timeout"
+    },
+    "repack": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Script to run when repacking the data. File descriptors 3 and 4, respectively, are pipes for the specified project content into and out of the script, in tar format.",
+      "title": "Repack"
     }
   },
   "required": [

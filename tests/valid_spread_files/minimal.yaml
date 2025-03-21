@@ -1,0 +1,11 @@
+project: hello-world
+
+backends:
+  lxd:
+    systems: [ubuntu-16.04]
+
+suites:
+  examples/:
+    summary: Simple examples
+
+path: /remote/path

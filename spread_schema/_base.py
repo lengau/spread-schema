@@ -15,7 +15,7 @@
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 """Base model for spread-schema models."""
 
-from typing import Annotated
+from typing import Annotated, Any
 
 import pydantic
 
@@ -30,7 +30,7 @@ class BaseModel(pydantic.BaseModel):
 
     model_config = pydantic.ConfigDict(
         validate_assignment=True,
-        extra="allow",
+        extra="forbid",
         populate_by_name=True,
         alias_generator=alias_generator,
         coerce_numbers_to_str=True,
@@ -52,10 +52,17 @@ class PrepareRestoreEachModel(BaseModel):
     restore_each: str | None = pydantic.Field(
         default=None, description="restore-each script. Runs once per task."
     )
+    debug: str | None = pydantic.Field(
+        default=None, description="Script to run when other scripts fail."
+    )
+    debug_each: str | None = pydantic.Field(
+        default=None, description="Debug script to run when each script fails"
+    )
 
 
 CoercedString = Annotated[
     str,
+    pydantic.BeforeValidator(str, json_schema_input_type=Any),
     pydantic.Field(
         coerce_numbers_to_str=True,
     ),

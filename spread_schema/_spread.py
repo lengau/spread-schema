@@ -16,9 +16,10 @@
 """Pydantic models for a spread.yaml file."""
 
 import pathlib
-from typing import Annotated, Literal, TypedDict
+from typing import Annotated, Literal
 
 import pydantic
+from typing_extensions import TypedDict
 
 from ._base import BaseModel, CoercedString, PrepareRestoreEachModel
 
@@ -26,19 +27,29 @@ from ._base import BaseModel, CoercedString, PrepareRestoreEachModel
 class System(BaseModel):
     """A customised system."""
 
+    image: str | None = pydantic.Field(
+        default=None,
+        description="The name of the image to use. Defaults to the system name.",
+    )
     username: str | None = None
     password: str | None = None
     workers: int | None = None
     memory: str | None = None
-    storage: str | None = None
+    storage: str | None = pydantic.Field(
+        default=None,
+        description="Storage to set on the system. Only used by google and linode backends.",
+    )
+    bios: Literal["uefi", None] = pydantic.Field(
+        default=None, description="Bios type to use. Only used by QEMU backend."
+    )
+    secure_boot: bool = pydantic.Field(
+        default=False,
+        description="Whether to use secure boot. Only used by the Google backend.",
+    )
 
 
 class BaseBackend(PrepareRestoreEachModel):
     """Backend configuration."""
-
-    model_config = PrepareRestoreEachModel.model_config | pydantic.ConfigDict(
-        extra="forbid",
-    )
 
     systems: list[str | dict[str, System]] = pydantic.Field(
         description="Operating systems and versions that this backend will start.",
@@ -55,6 +66,9 @@ class LxdBackend(BaseBackend):
 
 class QemuBackend(BaseBackend):
     type: Literal["qemu"] = "qemu"
+    memory: str | None = pydantic.Field(
+        default=None, description="The amount of memory to provide to each worker."
+    )
 
 
 class GoogleBackend(BaseBackend):
@@ -122,8 +136,7 @@ Backend = Annotated[
 
 
 class BackendDict(TypedDict, total=False):
-    # With Python 3.14 (https://peps.python.org/pep-0728/),
-    # set extra_items=Backend
+    __extra_items__: Backend
     lxd: LxdBackend
     qemu: QemuBackend
     google: GoogleBackend
@@ -148,7 +161,11 @@ class Suite(PrepareRestoreEachModel):
         default=None,
         description="A list of systems to test on. Defaults to all available.",
     )
-    environment: dict[str, str] | None = pydantic.Field(
+    backends: list[str] | None = pydantic.Field(
+        default=None,
+        description="Backends to run this suite on. Defaults to all available.",
+    )
+    environment: dict[str, CoercedString] | None = pydantic.Field(
         default=None, description="Environment variables to set in this test suite."
     )
     warn_timeout: str | None = pydantic.Field(
@@ -160,6 +177,9 @@ class Suite(PrepareRestoreEachModel):
         default=None,
         description="Default kill timeout for tests in this suite. Defaults to the project kill-timeout. -1 will disable timeout altogether.",
         examples=["30s", "1m30s", "10m", "1.5h"],
+    )
+    manual: bool = pydantic.Field(
+        default=False, description="Only run this suite when explicitly specified."
     )
 
 
@@ -178,7 +198,7 @@ class SpreadYaml(PrepareRestoreEachModel):
         description="Environment variables to set across the entire project.",
         coerce_numbers_to_str=True,
     )
-    backends: dict[str, Backend] = pydantic.Field(description="Backend configuration")
+    backends: BackendDict = pydantic.Field(description="Backend configuration")
     suites: dict[SuitePath, Suite]
     include: list[str] = pydantic.Field(
         default_factory=lambda: ["*"],
@@ -201,4 +221,8 @@ class SpreadYaml(PrepareRestoreEachModel):
         default=None,
         description="Default kill timeout for tests. Defaults to 15 minutes. -1 will disable timeout altogether.",
         examples=["30s", "1m30s", "10m", "1.5h"],
+    )
+    repack: str | None = pydantic.Field(
+        default=None,
+        description="Script to run when repacking the data. File descriptors 3 and 4, respectively, are pipes for the specified project content into and out of the script, in tar format.",
     )
