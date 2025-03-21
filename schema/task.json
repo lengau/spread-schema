@@ -1,0 +1,95 @@
+{
+  "additionalProperties": false,
+  "description": "task.yaml, a single task for spread.",
+  "properties": {
+    "summary": {
+      "description": "A brief summary of this task",
+      "title": "Summary",
+      "type": "string"
+    },
+    "artifacts": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Artifact paths to fetch after the test completes.",
+      "title": "Artifacts"
+    },
+    "environment": {
+      "anyOf": [
+        {
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Environment variables for this test.",
+      "title": "Environment"
+    },
+    "prepare": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Preparation to do for this task.",
+      "title": "Prepare"
+    },
+    "execute": {
+      "description": "The script where the actual testing is run.",
+      "title": "Execute",
+      "type": "string"
+    },
+    "restore": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Restore script. Runs after the task regardless of success.",
+      "title": "Restore"
+    },
+    "debug": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Debug script to run if the test fails.",
+      "title": "Debug"
+    },
+    "manual": {
+      "default": false,
+      "description": "Set to true to run this test only manually.",
+      "title": "Manual",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "summary",
+    "execute"
+  ],
+  "title": "TaskYaml",
+  "type": "object"
+}

@@ -1,0 +1,27 @@
+# https://github.com/canonical/spread/blob/master/tests/adhoc/task.yaml
+summary: Test the adhoc backend.
+
+prepare: |
+  if [ ! -f .spread-reuse.yaml ]; then
+      touch /run/spread-reuse.yaml
+      ln -s /run/spread-reuse.yaml .spread-reuse.yaml
+  fi
+
+execute: |
+  # Just ensure the lxd container is available for adhoc below.
+  spread -reuse lxd:
+
+  export ADHOC_USERNAME=root
+  export ADHOC_PASSWORD="$(python3 -c 'import sys, yaml; print(yaml.load(sys.stdin)["backends"]["lxd"]["systems"][0]["ubuntu-16.04"]["password"])' < .spread-reuse.yaml)"
+  export ADHOC_ADDRESS="$(python3 -c 'import sys, yaml; print(yaml.load(sys.stdin)["backends"]["lxd"]["systems"][0]["ubuntu-16.04"]["address"])' < .spread-reuse.yaml)"
+
+  spread -vv -resend adhoc: &> task.out
+
+  grep 'adhoc:ubuntu-16.04:checks/main' task.out
+  grep '^ALLOCATING$' task.out
+  grep '^DISCARDING$' task.out
+  grep '^WORKS$' task.out
+
+debug: |
+  cat .spread-reuse.yaml || true
+  cat task.out || true

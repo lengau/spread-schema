@@ -1,0 +1,7 @@
+# https://github.com/canonical/spread/blob/master/tests/manual/checks-a/task-m/task.yaml
+summary: The manual task.
+
+manual: true
+
+execute: |
+  echo WORKS:task-m

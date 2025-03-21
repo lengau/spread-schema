@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # This file is part of spread_schema.
 #
 # Copyright 2025 Canonical Ltd.
@@ -14,28 +13,32 @@
 #
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
-"""Generate JSON schema file for spread.yaml."""
+"""Tests for the task.yaml schema."""
 
-import json
 import pathlib
 
-import spread_schema
+import jsonschema
+import pytest
+import yaml
+from spread_schema import TaskYaml
 
-PROJECT_DIR = pathlib.Path(__file__).parent
-SCHEMA_DIR = PROJECT_DIR / "schema"
+TESTS_DIR = pathlib.Path(__file__).parent
+VALID_SPREAD_DIR = TESTS_DIR / "valid_task_files"
 
-with (SCHEMA_DIR / "spread.json").open("w") as f:
-    json.dump(
-        spread_schema.SpreadYaml.model_json_schema(),
-        f,
-        indent=2,
-    )
-    f.write("\n")
 
-with (SCHEMA_DIR / "task.json").open("w") as f:
-    json.dump(
-        spread_schema.TaskYaml.model_json_schema(),
-        f,
-        indent=2,
-    )
-    f.write("\n")
+@pytest.fixture(scope="session")
+def task_schema():
+    return TaskYaml.model_json_schema()
+
+
+@pytest.mark.parametrize(
+    "path",
+    [pytest.param(path, id=path.name) for path in VALID_SPREAD_DIR.glob("*.yaml")],
+)
+def test_validate_valid_files(path: pathlib.Path, task_schema):
+    with path.open("r") as f:
+        task_yaml = yaml.safe_load(f)
+
+    TaskYaml.model_validate(task_yaml)
+
+    jsonschema.validate(task_yaml, task_schema)

@@ -1,0 +1,5 @@
+# A minimal task.yaml file from the docs example.
+summary: Greet the planet
+execute: |
+  echo "Hello world!"
+  exit 1

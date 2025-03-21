@@ -28,6 +28,7 @@ except ImportError:  # pragma: no cover
 
 from ._base import alias_generator, BaseModel, PrepareRestoreEachModel
 from ._spread import System, Backend, BackendDict, SuitePath, Suite, SpreadYaml
+from ._task import TaskYaml
 
 
 __all__ = [
@@ -41,4 +42,5 @@ __all__ = [
     "SuitePath",
     "Suite",
     "SpreadYaml",
+    "TaskYaml",
 ]
