@@ -28,7 +28,8 @@ class TaskYaml(BaseModel):
         default=None, description="Artifact paths to fetch after the test completes."
     )
     environment: dict[str, CoercedString] | None = pydantic.Field(
-        default_factory=dict, description="Environment variables for this test."
+        default_factory=dict,  # type: ignore[arg-type]
+        description="Environment variables for this test.",
     )
     prepare: str | None = pydantic.Field(
         default=None, description="Preparation to do for this task."
