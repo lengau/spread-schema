@@ -148,7 +148,7 @@ Backend = Annotated[
 
 
 class BackendDict(TypedDict, total=False):
-    __pydantic_config__ = pydantic.ConfigDict(  # type: ignore[reportGeneralTypeIssues]
+    __pydantic_config__ = pydantic.ConfigDict(  # type: ignore[misc]
         extra="allow",
     )
     __extra_items__: Backend
