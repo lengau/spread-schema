@@ -917,7 +917,7 @@ prepare: |
       fi
   fi
 
-  # native jq replacement, but still with some incompatibilies, see
+  # native jq replacement, but still with some incompatibilities, see
   # https://github.com/itchyny/gojq
   # major differences:
   # - map keys are sorted by default
@@ -1021,7 +1021,7 @@ suites:
       _/plain_plusdirs: _
       _/funky: _
       _/files: _
-      # dirs fails on indirection because of (mis)handling of trailing
+      # dirs fails on indirection because of mishandling of trailing
       # slashes. This might be configuration-dependent.
       # _/dirs: _
       _/hosts: _
