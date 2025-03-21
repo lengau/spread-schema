@@ -108,6 +108,11 @@
           "title": "Systems",
           "type": "array"
         },
+        "environment": {
+          "description": "Environment variables to set on this backend.",
+          "title": "Environment",
+          "type": "object"
+        },
         "type": {
           "const": "adhoc",
           "default": "adhoc",
@@ -134,8 +139,9 @@
       "type": "object"
     },
     "BackendDict": {
+      "additionalProperties": true,
       "properties": {
-        "--extra-items--": {
+        "__extra_items__": {
           "discriminator": {
             "mapping": {
               "adhoc": "#/$defs/AdhocBackend",
@@ -163,7 +169,7 @@
               "$ref": "#/$defs/AdhocBackend"
             }
           ],
-          "title": "--Extra-Items--"
+          "title": "Extra Items"
         },
         "lxd": {
           "$ref": "#/$defs/LxdBackend"
@@ -291,6 +297,11 @@
           },
           "title": "Systems",
           "type": "array"
+        },
+        "environment": {
+          "description": "Environment variables to set on this backend.",
+          "title": "Environment",
+          "type": "object"
         },
         "type": {
           "const": "google",
@@ -448,6 +459,11 @@
           },
           "title": "Systems",
           "type": "array"
+        },
+        "environment": {
+          "description": "Environment variables to set on this backend.",
+          "title": "Environment",
+          "type": "object"
         },
         "type": {
           "const": "linode",
@@ -620,6 +636,11 @@
           "title": "Systems",
           "type": "array"
         },
+        "environment": {
+          "description": "Environment variables to set on this backend.",
+          "title": "Environment",
+          "type": "object"
+        },
         "type": {
           "const": "lxd",
           "default": "lxd",
@@ -739,6 +760,11 @@
           },
           "title": "Systems",
           "type": "array"
+        },
+        "environment": {
+          "description": "Environment variables to set on this backend.",
+          "title": "Environment",
+          "type": "object"
         },
         "type": {
           "const": "qemu",
@@ -941,6 +967,19 @@
           "description": "Only run this suite when explicitly specified.",
           "title": "Manual",
           "type": "boolean"
+        },
+        "priority": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Priority for this suite. Higher runs earlier.",
+          "title": "Priority"
         }
       },
       "required": [
@@ -953,6 +992,19 @@
       "additionalProperties": false,
       "description": "A customised system.",
       "properties": {
+        "image": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The name of the image to use. Defaults to the system name.",
+          "title": "Image"
+        },
         "username": {
           "anyOf": [
             {
@@ -1022,6 +1074,23 @@
             null
           ],
           "title": "Bios"
+        },
+        "secure-boot": {
+          "default": false,
+          "description": "Whether to use secure boot. Only used by the Google backend.",
+          "title": "Secure-Boot",
+          "type": "boolean"
+        },
+        "environment": {
+          "description": "Environment variables to set on this system.",
+          "title": "Environment",
+          "type": "object"
+        },
+        "manual": {
+          "default": false,
+          "description": "Whether to run this system manually. Defaults to false.",
+          "title": "Manual",
+          "type": "boolean"
         }
       },
       "title": "System",

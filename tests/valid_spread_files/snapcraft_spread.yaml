@@ -1,0 +1,361 @@
+# https://github.com/canonical/snapcraft/blob/main/spread.yaml
+project: snapcraft
+
+environment:
+  # Tell snapcraft to use the current host to build
+  SNAPCRAFT_BUILD_ENVIRONMENT: "host"
+
+  # Generate manifest when building snaps.
+  SNAPCRAFT_BUILD_INFO: "1"
+
+  # If SNAPCRAFT_PACKAGE_TYPE is "snap" and this variable is defined, spread
+  # will install snapcraft from that channel. Otherwise, it'll look for a snap
+  # in the source tree. If SNAPCRAFT_PACKAGE_TYPE is "deb" this variable does
+  # nothing.
+  SNAPCRAFT_CHANNEL: "$(HOST: echo ${SNAPCRAFT_CHANNEL})"
+
+  # Show error tracebacks
+  SNAPCRAFT_MANAGED_HOST: "yes"
+
+  # Disable all Sentry error reporting
+  SNAPCRAFT_ENABLE_ERROR_REPORTING: "no"
+
+  # Print potentially useful debugging info
+  SNAPCRAFT_ENABLE_DEVELOPER_DEBUG: "yes"
+
+  # Ensure that we have the right debian configuration for legacy
+  DEBIAN_FRONTEND: noninteractive
+  DEBIAN_PRIORITY: critical
+
+  TOOLS_DIR: /snapcraft/tests/spread/tools
+  PATH: $PATH:$TOOLS_DIR/snapd-testing-tools/tools/
+
+  # Git environment for commits
+  GIT_AUTHOR_NAME: "Test User"
+  GIT_AUTHOR_EMAIL: "test-user@email.com"
+
+  CRAFT_DEBUG: 1
+
+backends:
+  lxd:
+    systems:
+      # -native is added for clarity and for ubuntu-20.04* to match.
+      - ubuntu-20.04
+      - ubuntu-22.04
+  google:
+    key: '$(HOST: echo "$SPREAD_GOOGLE_KEY")'
+    location: snapd-spread/us-east1-b
+    halt-timeout: 2h
+    systems:
+      - ubuntu-20.04-64:
+          workers: 6
+          image: ubuntu-2004-64
+          storage: 40G
+      - ubuntu-22.04-64:
+          workers: 10
+          storage: 20G
+          image: ubuntu-2204-64
+      - ubuntu-24.04-64:
+          image: ubuntu-24.04-64
+          storage: 20G
+          workers: 6
+
+      - fedora-39-64:
+          workers: 2
+          manual: true
+
+  multipass:
+    type: adhoc
+    allocate: |
+      multipass_count=$(flock -x .spread_multipass -c 'COUNT=$(cat .spread_multipass); echo $(($COUNT + 1)) | tee .spread_multipass')
+
+      image=$(echo $SPREAD_SYSTEM | sed -e 's/ubuntu-\(.*\)-64/\1/')
+      spread_name=$(echo ${image} | sed -e 's/\.//g')
+      instance_name="spread-${spread_name}-${multipass_count}"
+
+      if [ -z "${image}" ]; then
+        FATAL "$SPREAD_SYSTEM is not supported!"
+      fi
+
+      multipass launch --disk 20G --memory 2G --name "$instance_name" "$image"
+
+      # Get the IP from the instance
+      ip=$(multipass info --format csv "$instance_name" | tail -1 | cut -d\, -f3)
+      # Enable PasswordAuthertication for root over SSH.
+      multipass exec "$instance_name" -- \
+        sudo sh -c "echo root:ubuntu | sudo chpasswd"
+      multipass exec "$instance_name" -- \
+        sudo sh -c \
+        "if [ -d /etc/ssh/sshd_config.d/ ]
+        then
+          echo 'PasswordAuthentication yes' > /etc/ssh/sshd_config.d/10-custom.conf
+          echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config.d/10-custom.conf
+        else
+          sed -i /etc/ssh/sshd_config -E -e 's/^#?PasswordAuthentication.*/PasswordAuthentication yes/' -e 's/^#?PermitRootLogin.*/PermitRootLogin yes/'
+        fi"
+      multipass exec "$instance_name" -- \
+        sudo systemctl restart ssh
+
+      ADDRESS "$ip"
+    discard: |
+      instance_name=$(multipass list --format csv | grep ",${SPREAD_SYSTEM_ADDRESS}," | cut -f1 -d\,)
+      if [[ ! -z "$instance_name" ]]; then
+        multipass delete --purge "${instance_name}"
+      fi
+    systems:
+      - ubuntu-20.04-64:
+          workers: 1
+          username: root
+          password: ubuntu
+      - ubuntu-22.04-64:
+          workers: 1
+          username: root
+          password: ubuntu
+      - ubuntu-24.04-64:
+          workers: 1
+          username: root
+          password: ubuntu
+
+exclude: [snaps-cache/]
+
+prepare: |
+  #shellcheck source=tests/spread/tools/prepare.sh
+  . "$TOOLS_DIR/prepare.sh"
+
+  if [[ -z $(ls -A "$TOOLS_DIR/snapd-testing-tools") ]]; then
+    echo "Cannot run spread because submodule 'snapd-testing-tools' does not exist. Fetch with 'git submodule update --init' and rerun spread."
+    exit 1
+  fi
+
+  # Now run 'apt-get update', but don't show output unless it fails. The logs are
+  # long enough as it is.
+  if os.query is-ubuntu; then
+    tempfile="$(mktemp)"
+    if ! apt-get update > "$tempfile" 2>&1; then
+        cat "$tempfile"
+        exit 1
+    fi
+  fi
+
+  tests.pkgs install snapd
+
+  snap wait system seed.loaded
+
+    # The /snap directory does not exist in some environments
+  [ ! -d /snap ] && ln -s /var/lib/snapd/snap /snap
+
+  # older linux releases have separate packages for lxd and lxc (lxd-client)
+  if [ "$SPREAD_SYSTEM" = "ubuntu-20.04-64" ]; then
+    tests.pkgs remove lxd lxd-client
+  else
+    tests.pkgs remove lxd
+  fi
+  snap install lxd --channel=latest/stable
+
+  # Hold snap refreshes for 24h.
+  snap set system refresh.hold="$(date --date=tomorrow +%Y-%m-%dT%H:%M:%S%:z)"
+  if ! snap watch --last=auto-refresh?; then
+      journalctl -xe
+  fi
+  if ! snap watch --last=install?; then
+      journalctl -xe
+  fi
+
+  /snap/bin/lxd waitready --timeout=30
+  /snap/bin/lxd init --auto
+
+  install_snapcraft
+
+  pushd /snapcraft
+  git config --global user.email "you@example.com"
+  git config --global user.name "Your Name"
+  git init
+  git add .
+  git commit -m "Testing Commit"
+  popd
+
+restore-each: |
+  "$TOOLS_DIR"/restore.sh
+
+suites:
+  tests/spread/core20/:
+    summary: core20 specific tests
+    systems:
+      - ubuntu-20.04*
+
+  tests/spread/core22/:
+    summary: core22 specific tests
+    systems:
+      - ubuntu-22.04
+      - ubuntu-22.04-64
+      - ubuntu-22.04-amd64
+      - ubuntu-22.04-arm64
+      - ubuntu-22.04-armhf
+      - ubuntu-22.04-s390x
+      - ubuntu-22.04-ppc64el
+    environment:
+      SNAPCRAFT_BUILD_ENVIRONMENT: ""
+
+  tests/spread/core22/environment/:
+    summary: core22 environment tests
+    systems:
+      - ubuntu-22.04*
+
+  tests/spread/core22/scriptlets/:
+    summary: core22 scriptlet tests
+    systems:
+      - ubuntu-22.04*
+
+  tests/spread/core22/manifest/:
+    summary: core22 manifest tests
+    systems:
+      - ubuntu-22.04*
+
+  tests/spread/core22/architectures/:
+    summary: core22 architecture tests
+    systems:
+      - ubuntu-22.04
+      - ubuntu-22.04-64
+      - ubuntu-22.04-amd64
+
+  tests/spread/core22/linters/:
+    summary: core22 linter tests
+    environment:
+      SNAPCRAFT_ENABLE_DEVELOPER_DEBUG: "n"
+
+    systems:
+      - ubuntu-22.04*
+
+  tests/spread/core22/patchelf/:
+    summary: core22 patchelf tests
+    systems:
+      - ubuntu-22.04*
+
+  tests/spread/core24/:
+    summary: core24 specific tests
+    systems:
+      - ubuntu-24.04*
+    environment:
+      SNAPCRAFT_BUILD_ENVIRONMENT: ""
+
+  tests/spread/core24-suites/environment/:
+    summary: core24 environment tests
+    systems:
+      - ubuntu-22.04*
+    environment:
+      SNAPCRAFT_BUILD_ENVIRONMENT: ""
+
+  tests/spread/core24-suites/scriptlets/:
+    summary: core24 scriptlet tests
+    systems:
+      - ubuntu-22.04*
+    environment:
+      SNAPCRAFT_BUILD_ENVIRONMENT: ""
+
+  tests/spread/core24-suites/manifest/:
+    summary: core24 manifest tests
+    systems:
+      - ubuntu-22.04*
+    environment:
+      SNAPCRAFT_BUILD_ENVIRONMENT: ""
+
+  tests/spread/core24-suites/patchelf/:
+    summary: core24 patchelf tests
+    systems:
+      - ubuntu-22.04*
+    environment:
+      SNAPCRAFT_BUILD_ENVIRONMENT: ""
+
+  tests/spread/core24-suites/plugins/:
+    summary: core24 plugin tests
+    systems:
+      - ubuntu-22.04*
+    environment:
+      SNAPCRAFT_BUILD_ENVIRONMENT: ""
+
+  # General, core suite
+  tests/spread/general/:
+    summary: tests of snapcraft core functionality
+    systems:
+      - ubuntu-20.04*
+      - ubuntu-22.04*
+
+  tests/spread/general/hooks/:
+    summary: tests of snapcraft hook functionality
+    systems:
+      - ubuntu-20.04*
+      - ubuntu-22.04*
+
+  tests/spread/core-devel/:
+    summary: tests of devel base snaps
+    systems:
+      - ubuntu-22.04*
+    environment:
+      SNAPCRAFT_BUILD_ENVIRONMENT: ""
+
+  # General, core suite
+  tests/spread/cross-compile/:
+    summary: tests of supported cross-compile functionality
+    systems:
+      - ubuntu-20.04
+      - ubuntu-20.04-64
+      - ubuntu-20.04-amd64
+
+  # Use of multipass and lxd build providers
+  tests/spread/providers/:
+    summary: tests of snapcraft using build providers
+    systems:
+      - ubuntu-20.04-64
+      - ubuntu-22.04-64
+    kill-timeout: 180m
+    priority: 90 # Run this test relatively early since fetching images can take time
+  tests/spread/providers/legacy/:
+    summary: tests of snapcraft using build providers
+    systems:
+      - ubuntu-20.04-64
+    kill-timeout: 180m
+    priority: 90 # Run this test relatively early since fetching images can take time
+
+  # Plugin-specific suites
+  tests/spread/plugins/v2/:
+    summary: tests of snapcraft's v2 plugins
+    systems:
+      - ubuntu-20.04*
+  tests/spread/plugins/craft-parts/:
+    summary: tests of snapcraft's craft-part's based plugins
+    systems:
+      - ubuntu-22.04*
+
+  # Extensions tests
+  tests/spread/extensions/:
+    summary: tests of snapcraft's extensions
+    kill-timeout: 20m
+
+  # External snap tests
+  tests/spread/snaps/:
+    environment:
+      SNAPCRAFT_BUILD_ENVIRONMENT: ""
+    manual: true
+    summary: external snaps
+    prepare: |
+      sudo apt-get install git
+      sudo apt-mark auto git
+
+  tests/spread/store/:
+    summary: tests of store-related snapcraft commands
+    manual: true
+    environment:
+      STORE_DASHBOARD_URL: https://dashboard.staging.snapcraft.io
+      STORE_API_URL: https://api.staging.snapcraft.io
+      STORE_UPLOAD_URL: https://storage.staging.snapcraftcontent.com
+      UBUNTU_ONE_SSO_URL: https://login.staging.ubuntu.com
+
+  docs/howto/code/:
+    summary: tests how-to guides from the docs
+    systems:
+      - ubuntu-24.04-64
+
+path: /snapcraft/
+include:
+  - docs/
+  - tests/

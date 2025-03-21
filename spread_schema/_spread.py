@@ -50,6 +50,10 @@ class System(BaseModel):
         default_factory=dict,
         description="Environment variables to set on this system.",
     )
+    manual: bool = pydantic.Field(
+        default=False,
+        description="Whether to run this system manually. Defaults to false.",
+    )
 
 
 class BaseBackend(PrepareRestoreEachModel):
@@ -191,6 +195,9 @@ class Suite(PrepareRestoreEachModel):
     )
     manual: bool = pydantic.Field(
         default=False, description="Only run this suite when explicitly specified."
+    )
+    priority: int | None = pydantic.Field(
+        default=None, description="Priority for this suite. Higher runs earlier."
     )
 
 
