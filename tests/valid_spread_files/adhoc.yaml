@@ -1,0 +1,35 @@
+# Adhoc test file
+# https://github.com/canonical/spread/blob/d6447c43754c8ca0741901e9db73d5fdb4d21c93/tests/adhoc/spread.yaml
+project: spread
+
+environment:
+  ADHOC_USERNAME: $(HOST:echo $ADHOC_USERNAME)
+  ADHOC_PASSWORD: $(HOST:echo $ADHOC_PASSWORD)
+  ADHOC_ADDRESS: $(HOST:echo $ADHOC_ADDRESS)
+
+backends:
+  lxd:
+    systems:
+      - ubuntu-16.04
+  adhoc:
+    allocate: |
+      echo ALLOCATING
+      ADDRESS $ADHOC_ADDRESS
+    discard: |
+      echo DISCARDING
+    systems:
+      - ubuntu-16.04:
+          username: $ADHOC_USERNAME
+          password: $ADHOC_PASSWORD
+
+path: /home/adhoc
+
+restore:
+  # Ensure it gets removed as we're not actually reusing, so
+  # the next run will barf it if finds the content in place.
+  rm -rf /home/adhoc
+
+suites:
+  checks/:
+    summary: Verification tasks.
+# vim:ts=4:sw=4:et

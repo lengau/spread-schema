@@ -34,6 +34,7 @@ class BaseModel(pydantic.BaseModel):
         populate_by_name=True,
         alias_generator=alias_generator,
         coerce_numbers_to_str=True,
+        use_attribute_docstrings=True,
     )
 
 

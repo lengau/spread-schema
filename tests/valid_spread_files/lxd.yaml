@@ -1,0 +1,19 @@
+# Upstream LXD spread file
+# https://github.com/canonical/spread/blob/d6447c43754c8ca0741901e9db73d5fdb4d21c93/tests/lxd/spread.yaml
+project: spread
+
+backends:
+  lxd:
+    systems:
+      - ubuntu-16.04
+      - ubuntu-18.04
+      - ubuntu-20.04
+      - ubuntu-22.04
+      - ubuntu-24.04
+
+path: /home/test
+
+suites:
+  checks/:
+    summary: Verification tasks.
+# vim:ts=4:sw=4:et

@@ -39,4 +39,6 @@ def test_validate_valid_files(path: pathlib.Path, spread_schema):
     with path.open("r") as f:
         spread_yaml = yaml.safe_load(f)
 
+    SpreadYaml.model_validate(spread_yaml)
+
     jsonschema.validate(spread_yaml, spread_schema)

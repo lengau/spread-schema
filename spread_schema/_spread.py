@@ -46,6 +46,10 @@ class System(BaseModel):
         default=False,
         description="Whether to use secure boot. Only used by the Google backend.",
     )
+    environment: dict[str, CoercedString] = pydantic.Field(
+        default_factory=dict,
+        description="Environment variables to set on this system.",
+    )
 
 
 class BaseBackend(PrepareRestoreEachModel):
@@ -57,6 +61,10 @@ class BaseBackend(PrepareRestoreEachModel):
             "fedora-41-64",
             {"ubuntu-24.04-64": {"workers": 4}},
         ],
+    )
+    environment: dict[str, CoercedString] = pydantic.Field(
+        default_factory=dict,
+        description="Environment variables to set on this backend.",
     )
 
 
@@ -136,6 +144,9 @@ Backend = Annotated[
 
 
 class BackendDict(TypedDict, total=False):
+    __pydantic_config__ = pydantic.ConfigDict(  # type: ignore[reportGeneralTypeIssues]
+        extra="allow",
+    )
     __extra_items__: Backend
     lxd: LxdBackend
     qemu: QemuBackend
@@ -196,7 +207,6 @@ class SpreadYaml(PrepareRestoreEachModel):
     environment: dict[str, CoercedString] = pydantic.Field(
         default_factory=dict,
         description="Environment variables to set across the entire project.",
-        coerce_numbers_to_str=True,
     )
     backends: BackendDict = pydantic.Field(description="Backend configuration")
     suites: dict[SuitePath, Suite]
